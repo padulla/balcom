@@ -107,6 +107,12 @@ python pipelines/download_mdic_raw.py   --url "https://exemplo.gov.br/arquivo.cs
 python pipelines/staging_from_csv.py   --input data/raw/mdic/2025/arquivo.csv   --output data/staging/mdic/2025/arquivo_padronizado.csv
 ```
 
+4. Catalogar links disponíveis na página da base bruta MDIC:
+
+```bash
+python pipelines/catalog_mdic_assets.py --output docs/mdic_assets_catalog.csv
+```
+
 ## Pipeline ETL/ELT (passo a passo)
 
 1. **Ingestão**
