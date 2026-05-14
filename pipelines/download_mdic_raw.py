@@ -1,13 +1,10 @@
-"""Baixa arquivos brutos da balança comercial para a camada raw.
-
-Uso:
-  python pipelines/download_mdic_raw.py --url <arquivo> --fonte mdic --competencia 2025-01
-"""
+"""Baixa arquivos brutos da balança comercial para a camada raw e registra metadados."""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
+import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
@@ -15,6 +12,7 @@ from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW_ROOT = ROOT / "data" / "raw"
+DB_PATH = ROOT / "data" / "balcom.db"
 
 
 def sha256_file(path: Path) -> str:
@@ -39,6 +37,25 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
+def register_metadata(meta: dict[str, str]) -> None:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON;")
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO controle_arquivos_raw
+              (fonte_url, arquivo_origem, hash_arquivo, data_download_utc, competencia_referente)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                meta["fonte_url"],
+                meta["arquivo_origem"],
+                meta["hash_arquivo"],
+                meta["data_download_utc"],
+                meta["competencia_referente"],
+            ),
+        )
+
+
 def main() -> None:
     args = parse_args()
     year = args.competencia.split("-")[0]
@@ -55,8 +72,9 @@ def main() -> None:
         "data_download_utc": datetime.now(timezone.utc).isoformat(),
         "competencia_referente": args.competencia,
     }
+    register_metadata(metadata)
 
-    print("Download concluído:")
+    print("Download concluído e metadado registrado:")
     for k, v in metadata.items():
         print(f"- {k}: {v}")
 

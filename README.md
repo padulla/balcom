@@ -150,3 +150,18 @@ python pipelines/staging_from_csv.py   --input data/raw/mdic/2025/arquivo.csv   
 
 - Habilitar `PRAGMA foreign_keys = ON;` na conexão para validar chaves estrangeiras.
 - Para grandes volumes, migrar para DuckDB/PostgreSQL no futuro sem mudar o modelo lógico.
+
+## Carga inicial da fato a partir da staging
+
+Para carregar dados padronizados na `f_comercio_exterior`, o CSV precisa conter ao menos:
+- `data_referencia` (YYYY-MM-DD)
+- `fluxo_codigo` (ex.: EXP/IMP)
+- `fluxo_nome`
+- `valor_usd_fob`
+- `fonte`
+
+Execução:
+
+```bash
+python pipelines/load_staging_to_sqlite.py --input data/staging/mdic/2025/arquivo_padronizado.csv
+```
