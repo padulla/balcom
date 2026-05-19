@@ -1,0 +1,7 @@
+# SQLite database artifacts
+data/*.db
+data/*.db-*
+
+# Python cache
+__pycache__/
+*.pyc
